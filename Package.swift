@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "Vice",
-    platforms: [.iOS(.v13), .macOS(.v10_13)],
+    platforms: [.macOS(.v10_13)],
     products: [
         .executable(name: "vice", targets: ["Vice"]),
         .library(name: "Jaws", targets: ["Jaws"])

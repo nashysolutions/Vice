@@ -1,6 +1,6 @@
 # Vice
 
-![](https://img.shields.io/badge/platform-macOS%2BiOS%2Blinux-blue)
+![](https://img.shields.io/badge/platform-macOS%20%2B%20linux-blue)
 ![](https://img.shields.io/badge/swift-5.3-blue)
 [![Build Status](https://app.bitrise.io/app/e3c11122a72d9a53/status.svg?token=nTse58IVAQ3qolGoCMmKiw&branch=main)](https://app.bitrise.io/app/e3c11122a72d9a53)
 
@@ -54,11 +54,10 @@ If you have any issues with unix directories [this article](https://superuser.co
 ```swift
 let package = Package(
     platforms: [
-        .iOS(.v13), 
         .macOS(.v10_13)
     ]
     dependencies: [
-        .package(name: "Vice", url: "https://github.com/nashysolutions/Vice.git", .upToNextMinor(from: "1.0.0"))
+        .package(name: "Vice", url: "https://github.com/nashysolutions/Vice.git", .upToNextMinor(from: "2.0.0"))
     ],
     targets: [
         .target(
