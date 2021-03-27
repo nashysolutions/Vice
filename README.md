@@ -7,6 +7,7 @@
 A command line tool for resizing png images. The underlying API is also available, should you want to include it in your development projects.
 
 ## Usage
+
 To resize to 100 width x 200 height.
 ```
 $ vice ~/Desktop/Filename.png 100 200
@@ -30,6 +31,9 @@ OPTIONS:
   -h, --help              Show help information.
 ```
 ### Jaws API
+
+The underlying core library is also available as a product (see installation below).
+
 ```swift
 import Files // github.com:JohnSundell/Files
 import Jaws
@@ -40,7 +44,10 @@ let jaws = Jaws(file: file, targetSize: targetSize, maintainRatio: false)
 try jaws.resize()
 ```
 ## Installation
-Install [Swift](https://swift.org/getting-started/) (at least version 5.3) then run the following commands.
+
+Install [Swift](https://swift.org/getting-started/).
+
+### Vice Command Line Tool
 ```
 $ git clone https://github.com/nashysolutions/Vice.git
 $ cd Vice
@@ -50,7 +57,15 @@ $ cp -f vice /usr/local/bin/vice
 ```
 If you have any issues with unix directories [this article](https://superuser.com/questions/717663/permission-denied-when-trying-to-cd-usr-local-bin-from-terminal) might be helpful.
 
-## Adding underlying `Jaws` API as a Dependency
+### Jaws Library
+
+[Swift 5.3](https://swift.org/blog/swift-5-3-released/) only knows how to skip dependencies not used by *any* product, which in this package is none. 
+
+As a result, if you mark your target as depending on the `Jaws` product, Swift will download all the source for all the dependencies in this package. 
+
+Further, the entire `Vice` package will be downloaded so that files such as the README and other such documentation is available. 
+
+That being said, only the source required for `Jaws` will be compiled.
 
 ```swift
 let package = Package(
