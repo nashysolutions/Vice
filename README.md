@@ -1,6 +1,6 @@
 # Vice
 
-![](https://img.shields.io/badge/platform-macOS%20%2B%20linux-blue)
+![](https://img.shields.io/badge/platform-macOS%2BiOS%2Blinux-blue)
 ![](https://img.shields.io/badge/swift-5.3-blue)
 [![Build Status](https://app.bitrise.io/app/e3c11122a72d9a53/status.svg?token=nTse58IVAQ3qolGoCMmKiw&branch=main)](https://app.bitrise.io/app/e3c11122a72d9a53)
 
@@ -59,19 +59,12 @@ If you have any issues with unix directories [this article](https://superuser.co
 
 ### Jaws Library
 
-[Swift 5.3](https://swift.org/blog/swift-5-3-released/) only knows how to skip dependencies not used by *any* product, which in this package is none. 
-
-As a result, if you mark your target as depending on the `Jaws` product, Swift will download all the source for all the dependencies in this package. 
-
-Further, the entire `Vice` package will be downloaded so that files such as the README and other such documentation is available. 
-
-That being said, only the source required for `Jaws` will be compiled.
-
 ```swift
 let package = Package(
-    platforms: [
-        .macOS(.v10_13)
-    ]
+    name: "MyTool",
+    products: [
+        .executable(name: "tool", targets: ["MyTool"]),
+    ],
     dependencies: [
         .package(name: "Vice", url: "https://github.com/nashysolutions/Vice.git", .upToNextMinor(from: "2.0.0"))
     ],
@@ -84,4 +77,10 @@ let package = Package(
     ]
 )
 ```
+[Swift 5.3](https://swift.org/blog/swift-5-3-released/) only knows how to skip dependencies not used by *any* product, which in this package is none. This is a limitation at the moment with the Swift package manager.
 
+As a result, if you mark your target as depending on the `Jaws` product, Swift will download all the source for all the dependencies in this package. 
+
+Further, the entire `Vice` package will be downloaded so that files such as the README and other such documentation is available.
+
+That being said, only the source required for `Jaws` will be compiled.

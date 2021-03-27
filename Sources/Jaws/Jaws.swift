@@ -1,6 +1,10 @@
 import AVFoundation
 import Files
 
+#if canImport(UIKit)
+import UIKit
+#endif
+
 public struct Jaws {
     
     let file: File
@@ -49,11 +53,16 @@ public struct Jaws {
 private extension File {
     
     func save(_ image: CGImage) throws {
+        #if canImport(AppKit)
         let imageData = CFDataCreateMutable(nil, 0)!
         let imageDestination = CGImageDestinationCreateWithData(imageData, kUTTypePNG, 1, nil)!
         CGImageDestinationAddImage(imageDestination, image, nil)
         CGImageDestinationFinalize(imageDestination)
         try write(imageData as Data)
+        #elseif canImport(UIKit)
+        let data = UIImage(cgImage: image).pngData()!
+        try write(data)
+        #endif
     }
     
     func loadImage() -> CGImage? {
