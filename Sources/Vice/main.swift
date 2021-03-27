@@ -29,9 +29,13 @@ public struct Vice: ParsableCommand {
     
     @Argument(help: "The target height of the image.")
     public var height: Int
+    
+    @Flag(name: .shortAndLong, help: "Maintain aspect ratio")
+    public var ratio: Bool = false
 
     mutating public func run() throws {
-        let jaws = Jaws(file: file, width: width, height: height)
+        let targetSize = Size(width: width, height: height)
+        let jaws = Jaws(file: file, targetSize: targetSize, maintainRatio: ratio)
         try jaws.resize()
     }
 }

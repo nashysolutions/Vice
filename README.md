@@ -11,10 +11,14 @@ To resize to 100 width x 200 height.
 ```
 $ vice ~/Desktop/Filename.png 100 200
 ```
+To maintain aspect ratio
+```
+$ vice -r ~/Desktop/Filename.png 100 9999
+```
 ### Man Page
 
 ```
-USAGE: vice <file> <width> <height>
+USAGE: vice <file> <width> <height> [--ratio]
 
 ARGUMENTS:
   <file>                  A local image file. 
@@ -22,6 +26,7 @@ ARGUMENTS:
   <height>                The target height of the image. 
 
 OPTIONS:
+  -r, --ratio             Maintain aspect ratio 
   -h, --help              Show help information.
 ```
 ### Jaws API
@@ -29,7 +34,8 @@ OPTIONS:
 import Files // github.com:JohnSundell/Files
 
 let file = File(path: "~/myfile.png")
-let jaws = Jaws(file: file, width: 100, height: 200)
+let targetSize = Size(width: width, height: height)
+let jaws = Jaws(file: file, targetSize: targetSize, maintainRatio: false)
 try jaws.resize()
 ```
 ## Installation
