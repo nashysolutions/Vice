@@ -32,8 +32,9 @@ OPTIONS:
 ### Jaws API
 ```swift
 import Files // github.com:JohnSundell/Files
+import Jaws
 
-let file = File(path: "~/myfile.png")
+let file = try File(path: "~/myfile.png")
 let targetSize = Size(width: width, height: height)
 let jaws = Jaws(file: file, targetSize: targetSize, maintainRatio: false)
 try jaws.resize()
