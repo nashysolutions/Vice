@@ -2,7 +2,6 @@
 
 ![](https://img.shields.io/badge/platform-macOS%2BiOS%2Blinux-blue)
 ![](https://img.shields.io/badge/swift-5.3-blue)
-[![Build Status](https://app.bitrise.io/app/e3c11122a72d9a53/status.svg?token=nTse58IVAQ3qolGoCMmKiw&branch=main)](https://app.bitrise.io/app/e3c11122a72d9a53)
 
 A command line tool for resizing png images. The underlying API is also available, should you want to include it in your development projects.
 
