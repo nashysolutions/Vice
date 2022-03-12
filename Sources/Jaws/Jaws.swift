@@ -7,9 +7,18 @@ import UIKit
 
 public struct Jaws {
     
+    public enum Error: Swift.Error {
+        case missing(URL), targetSize, resizing
+    }
+    
     let file: File
     let targetSize: Size
     let maintainRatio: Bool
+    
+    public init(url: URL, targetSize: Size, maintainRatio: Bool) throws {
+        let file = try File(path: url.path)
+        self.init(file: file, targetSize: targetSize, maintainRatio: maintainRatio)
+    }
     
     public init(file: File, targetSize: Size, maintainRatio: Bool) {
         self.file = file
@@ -25,28 +34,36 @@ public struct Jaws {
         return aspectRect.size.trimmed
     }
     
-    public func resize() throws {
+    /**
+     Redraws the image.
+     - Parameter save: Should save by overwriting original location on disk.
+     - Throws: `Jaws.Error`, `Files.WriteError`
+     - Returns: A new string saying hello to `recipient`.
+     */
+    @discardableResult
+    public func resize(save: Bool = true) throws -> CGImage {
         
         guard let image = file.loadImage() else {
-            print("💥  Cannot find image at '\(file.url.path)'")
-            exit(1)
+            throw Error.missing(file.url)
         }
         
         let targetSize = establishSize(for: image)
 
         guard let context = CGContext.make(size: targetSize) else {
-            print("💥  Invalid target size")
-            exit(1)
+            throw Error.targetSize
         }
         
         context.draw(image, in: targetSize.rect)
 
         guard let resizedImage = context.makeImage() else {
-            print("💥  Failed to resize image")
-            exit(1)
+            throw Error.resizing
         }
 
-        try file.save(resizedImage)
+        if save {
+            try file.save(resizedImage)
+        }
+        
+        return resizedImage
     }
 }
 
@@ -114,5 +131,19 @@ private extension CGContext {
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedFirst.rawValue
         )
+    }
+}
+
+extension Jaws.Error: LocalizedError {
+    
+    public var errorDescription: String? {
+        switch self {
+        case .missing(let url):
+            return "💥  Cannot find image at '\(url.path)'"
+        case .targetSize:
+            return "💥  Invalid target size"
+        case .resizing:
+            return "💥  Failed to resize image"
+        }
     }
 }
