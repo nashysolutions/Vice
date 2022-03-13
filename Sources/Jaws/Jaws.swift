@@ -12,26 +12,27 @@ public struct Jaws {
     }
     
     let file: File
-    let targetSize: Size
+    let targetSize: CGSize
     let maintainRatio: Bool
     
-    public init(url: URL, targetSize: Size, maintainRatio: Bool) throws {
+    public init(url: URL, targetSize: CGSize, maintainRatio: Bool) throws {
         let file = try File(path: url.path)
         self.init(file: file, targetSize: targetSize, maintainRatio: maintainRatio)
     }
     
-    public init(file: File, targetSize: Size, maintainRatio: Bool) {
+    public init(file: File, targetSize: CGSize, maintainRatio: Bool) {
         self.file = file
         self.targetSize = targetSize
         self.maintainRatio = maintainRatio
     }
     
-    func establishSize(for image: CGImage) -> Size {
+    func establishSize(for image: CGImage) -> CGSize {
         if !maintainRatio {
             return targetSize
         }
-        let aspectRect = AVMakeRect(aspectRatio: image.size, insideRect: targetSize.rect)
-        return aspectRect.size.trimmed
+        let rect = CGRect(origin: .zero, size: targetSize)
+        let aspectRect = AVMakeRect(aspectRatio: image.size, insideRect: rect)
+        return aspectRect.size
     }
     
     /**
@@ -53,7 +54,8 @@ public struct Jaws {
             throw Error.targetSize
         }
         
-        context.draw(image, in: targetSize.rect)
+        let rect = CGRect(origin: .zero, size: targetSize)
+        context.draw(image, in: rect)
 
         guard let resizedImage = context.makeImage() else {
             throw Error.resizing
@@ -90,14 +92,6 @@ private extension File {
     }
 }
 
-private extension Size {
-    
-    var rect: CGRect {
-        let size = CGSize(width: CGFloat(width), height: CGFloat(height))
-        return CGRect(origin: .zero, size: size)
-    }
-}
-
 private extension CGImage {
     
     var size: CGSize {
@@ -111,21 +105,25 @@ private extension CGImage {
 
 private extension CGSize {
     
-    var trimmed: Size {
-        Size(width: Int(width.rounded()), height: Int(height.rounded()))
+    var roundedWidth: Int {
+        Int(width.rounded())
+    }
+    
+    var roundedHeight: Int {
+        Int(height.rounded())
     }
 }
 
 private extension CGContext {
     
-    static func make(size: Size) -> CGContext? {
+    static func make(size: CGSize) -> CGContext? {
         guard size.width > 0, size.height > 0 else {
             return nil
         }
         return CGContext(
             data: nil,
-            width: size.width,
-            height: size.height,
+            width: size.roundedWidth,
+            height: size.roundedHeight,
             bitsPerComponent: 8,
             bytesPerRow: 0,
             space: CGColorSpaceCreateDeviceRGB(),
