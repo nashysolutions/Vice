@@ -1,5 +1,6 @@
 import AVFoundation
 import Files
+import ImageIO
 
 #if canImport(UIKit)
 import UIKit
@@ -11,9 +12,9 @@ public struct Jaws {
         case missing(URL), targetSize, resizing
     }
     
-    let file: File
-    let targetSize: CGSize
-    let maintainRatio: Bool
+    private let file: File
+    private let targetSize: CGSize
+    private let maintainRatio: Bool
     
     public init(url: URL, targetSize: CGSize, maintainRatio: Bool) throws {
         let file = try File(path: url.path)
@@ -26,7 +27,7 @@ public struct Jaws {
         self.maintainRatio = maintainRatio
     }
     
-    func establishSize(for image: CGImage) -> CGSize {
+    private func establishSize(for image: CGImage) -> CGSize {
         if !maintainRatio {
             return targetSize
         }
@@ -49,46 +50,82 @@ public struct Jaws {
         }
         
         let targetSize = establishSize(for: image)
-
-        guard let context = CGContext.make(size: targetSize) else {
-            throw Error.targetSize
+        let resizedImage: CGImage
+        if image.isPortrait && targetSize.isThumbnail {
+            resizedImage = try resizeWithImageIO(targetSize)
+        } else {
+            resizedImage = try resizeWithCoreGraphics(image, targetSize)
         }
         
-        let rect = CGRect(origin: .zero, size: targetSize)
-        context.draw(image, in: rect)
-
-        guard let resizedImage = context.makeImage() else {
-            throw Error.resizing
-        }
-
         if save {
             try file.save(resizedImage)
         }
         
         return resizedImage
     }
+    
+    private func resizeWithCoreGraphics(_ image: CGImage, _ targetSize: CGSize) throws -> CGImage {
+        
+        guard let context = CGContext.make(size: targetSize) else {
+            throw Error.targetSize
+        }
+        
+        let rect = CGRect(origin: .zero, size: targetSize)
+        context.draw(image, in: rect)
+        
+        guard let resizedImage = context.makeImage() else {
+            throw Error.resizing
+        }
+        
+        return resizedImage
+    }
+    
+    private func resizeWithImageIO(_ targetSize: CGSize) throws -> CGImage {
+        
+        let options: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageIfAbsent: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceShouldCacheImmediately: true,
+            kCGImageSourceThumbnailMaxPixelSize: max(targetSize.width, targetSize.height)
+        ]
+        
+        guard
+            let imageSource = CGImageSourceCreateWithURL(file.url as NSURL, nil),
+            let image = CGImageSourceCreateThumbnailAtIndex(imageSource, 0, options as CFDictionary) else {
+                throw Error.resizing
+            }
+        
+        return image
+    }
 }
 
 private extension File {
     
     func save(_ image: CGImage) throws {
-        #if canImport(AppKit)
+#if canImport(AppKit)
         let imageData = CFDataCreateMutable(nil, 0)!
         let imageDestination = CGImageDestinationCreateWithData(imageData, kUTTypePNG, 1, nil)!
         CGImageDestinationAddImage(imageDestination, image, nil)
         CGImageDestinationFinalize(imageDestination)
         try write(imageData as Data)
-        #elseif canImport(UIKit)
+#elseif canImport(UIKit)
         let data = UIImage(cgImage: image).pngData()!
         try write(data)
-        #endif
+#endif
     }
     
     func loadImage() -> CGImage? {
-        guard let imageSource = CGImageSourceCreateWithURL(url as CFURL, nil) else {
-            return nil
-        }
-        return CGImageSourceCreateImageAtIndex(imageSource, 0, nil)
+        var nsError: NSError?
+        var image: CGImage?
+        NSFileCoordinator().coordinate(
+            readingItemAt: url, options: .withoutChanges, error: &nsError,
+            byAccessor: { (newURL: URL) -> Void in
+                if let imageSource = CGImageSourceCreateWithURL(newURL as CFURL, nil) {
+                    image = CGImageSourceCreateImageAtIndex(imageSource, 0, nil)
+                }
+            }
+        )
+        return image
     }
 }
 
@@ -98,12 +135,16 @@ private extension CGImage {
         CGSize(width: width, height: height)
     }
     
-    var isLandscape: Bool {
-        size.width > size.height
+    var isPortrait: Bool {
+        size.width < size.height
     }
 }
 
 private extension CGSize {
+    
+    var isThumbnail: Bool {
+        width < 401 || height < 401
+    }
     
     var roundedWidth: Int {
         Int(width.rounded())

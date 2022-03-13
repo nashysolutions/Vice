@@ -27,6 +27,23 @@ final class JawsTests: XCTestCase {
     }
     
     func testIgnoreAspect() throws {
+        let width = 500
+        let height = 900
+        let targetSize = CGSize(width: width, height: height)
+        let path = Bundle.module.path(forResource: "landscape", ofType: "png")
+        XCTAssertNotNil(path, "Local resource expected and not found.")
+        let file = try File(path: path!).copy(to: testFolder)
+        let original = try file.load()
+        XCTAssertNotNil(original)
+        XCTAssertNotEqual(original?.size, targetSize)
+        let jaws = Jaws(file: file, targetSize: .init(width: width, height: height), maintainRatio: false)
+        try jaws.resize()
+        let scaled = try file.load()
+        XCTAssertNotNil(scaled)
+        XCTAssertEqual(scaled?.size, targetSize)
+    }
+    
+    func testIgnoreAspectForThumbnail() throws {
         let width = 200
         let height = 300
         let targetSize = CGSize(width: width, height: height)
@@ -44,6 +61,23 @@ final class JawsTests: XCTestCase {
     }
     
     func testLandscape() throws {
+        let width = 500
+        let height = 900
+        let targetSize = CGSize(width: width, height: height)
+        let path = Bundle.module.path(forResource: "landscape", ofType: "png")
+        XCTAssertNotNil(path, "Local resource expected and not found.")
+        let file = try File(path: path!).copy(to: testFolder)
+        let original = try file.load()
+        XCTAssertNotNil(original)
+        XCTAssertNotEqual(original?.size, targetSize)
+        let jaws = Jaws(file: file, targetSize: .init(width: width, height: height), maintainRatio: true)
+        try jaws.resize()
+        let scaled = try file.load()
+        XCTAssertNotNil(scaled)
+        XCTAssertEqual(scaled?.size, CGSize(width: 500, height: 394))
+    }
+    
+    func testLandscapeThumbnail() throws {
         let width = 200
         let height = 300
         let targetSize = CGSize(width: width, height: height)
@@ -61,6 +95,23 @@ final class JawsTests: XCTestCase {
     }
     
     func testPortrait() throws {
+        let width = 500
+        let height = 900
+        let targetSize = CGSize(width: width, height: height)
+        let path = Bundle.module.path(forResource: "portrait", ofType: "png")
+        XCTAssertNotNil(path, "Local resource expected and not found.")
+        let file = try File(path: path!).copy(to: testFolder)
+        let original = try file.load()
+        XCTAssertNotNil(original)
+        XCTAssertNotEqual(original?.size, targetSize)
+        let jaws = Jaws(file: file, targetSize: .init(width: width, height: height), maintainRatio: true)
+        try jaws.resize()
+        let scaled = try file.load()
+        XCTAssertNotNil(scaled)
+        XCTAssertEqual(scaled?.size, CGSize(width: 500, height: 678))
+    }
+    
+    func testPortraitThumbnail() throws {
         let width = 200
         let height = 300
         let targetSize = CGSize(width: width, height: height)
@@ -76,12 +127,31 @@ final class JawsTests: XCTestCase {
         XCTAssertNotNil(scaled)
         XCTAssertEqual(scaled?.size, CGSize(width: 200, height: 271))
     }
+    
+    func testPerformancePortrait() throws {
+        
+        self.measure {
+            try? testPortrait()
+        }
+    }
+    
+    func testPerformancePortraitThumbnail() throws {
+        
+        self.measure {
+            try? testPortraitThumbnail()
+        }
+    }
 
     static var allTests = [
         (
             "testIgnoreAspect", testIgnoreAspect,
+            "testIgnoreAspectForThumbnail", testIgnoreAspectForThumbnail,
             "testLandscape", testLandscape,
-            "testPortrait", testPortrait
+            "testLandscapeThumbnail", testLandscapeThumbnail,
+            "testPortrait", testPortrait,
+            "testPortraitThumbnail", testPortraitThumbnail,
+            "testPerformancePortrait", testPerformancePortrait,
+            "testPerformancePortraitThumbnail", testPerformancePortraitThumbnail
         ),
     ]
 }
