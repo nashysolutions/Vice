@@ -35,7 +35,7 @@ public struct Vice: ParsableCommand {
 
     mutating public func run() throws {
         let targetSize = CGSize(width: width, height: height)
-        let jaws = Jaws(file: file, targetSize: targetSize, maintainRatio: ratio)
+        var jaws = Jaws(file: file, targetSize: targetSize, maintainRatio: ratio)
         try jaws.resize()
     }
 }

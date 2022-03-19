@@ -9,12 +9,18 @@ import UIKit
 public struct Jaws {
     
     public enum Error: Swift.Error {
-        case missing(URL), targetSize, resizing
+        case missing(URL), targetSize, resizing, decoding
     }
     
     private let file: File
     private let targetSize: CGSize
     private let maintainRatio: Bool
+    
+    /// The original image from disk.
+    /// - Returns: The image data or nil if the image was not found.
+    public lazy var original: CGImage? = {
+        file.loadImage()
+    }()
     
     public init(url: URL, targetSize: CGSize, maintainRatio: Bool) throws {
         let file = try File(path: url.path)
@@ -37,15 +43,15 @@ public struct Jaws {
     }
     
     /**
-     Redraws the image.
+     Loads the image from disk and then redraws the image to targetSize.
      - Parameter save: Should save by overwriting original location on disk.
      - Throws: `Jaws.Error`, `Files.WriteError`
      - Returns: A new string saying hello to `recipient`.
      */
     @discardableResult
-    public func resize(save: Bool = true) throws -> CGImage {
-        
-        guard let image = file.loadImage() else {
+    public mutating func resize(save: Bool = true) throws -> CGImage {
+
+        guard let image = original else {
             throw Error.missing(file.url)
         }
         
@@ -102,16 +108,10 @@ public struct Jaws {
 private extension File {
     
     func save(_ image: CGImage) throws {
-#if canImport(AppKit)
-        let imageData = CFDataCreateMutable(nil, 0)!
-        let imageDestination = CGImageDestinationCreateWithData(imageData, kUTTypePNG, 1, nil)!
-        CGImageDestinationAddImage(imageDestination, image, nil)
-        CGImageDestinationFinalize(imageDestination)
-        try write(imageData as Data)
-#elseif canImport(UIKit)
-        let data = UIImage(cgImage: image).pngData()!
+        guard let data = image.pngData else {
+            throw Jaws.Error.decoding
+        }
         try write(data)
-#endif
     }
     
     func loadImage() -> CGImage? {
@@ -137,6 +137,19 @@ private extension CGImage {
     
     var isPortrait: Bool {
         size.width < size.height
+    }
+    
+    var pngData: Data? {
+#if canImport(UIKit)
+        return UIImage(cgImage: self).pngData()
+#endif
+        let data: CFMutableData = CFDataCreateMutable(nil, 0)
+        guard let destination = CGImageDestinationCreateWithData(data, kUTTypePNG, 1, nil) else {
+            return nil
+        }
+        CGImageDestinationAddImage(destination, self, nil)
+        CGImageDestinationFinalize(destination)
+        return data as Data
     }
 }
 
@@ -183,6 +196,8 @@ extension Jaws.Error: LocalizedError {
             return "💥  Invalid target size"
         case .resizing:
             return "💥  Failed to resize image"
+        case .decoding:
+            return "There was a problem generating the data. Maybe the underlying CGImageRef contains data in an unsupported bitmap format."
         }
     }
 }
