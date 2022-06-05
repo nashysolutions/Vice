@@ -1,11 +1,14 @@
 # Vice
 
-![](https://img.shields.io/badge/platform-macOS%2BiOS%2Blinux-blue)
-![](https://img.shields.io/badge/swift-5.3-blue)
+![iOS](https://img.shields.io/badge/iOS-13%2B-blue)
+![macOS](https://img.shields.io/badge/macOS-10.13%2B-blue)
 
-A command line tool for resizing png images. The underlying API is also available, should you want to include it in your development projects.
+## Products
 
-## Usage
+* A macOS command line tool for resizing png images. 
+* An iOS library for resizing png images.
+
+## Usage: Command Line Tool
 
 To resize to 100 width x 200 height.
 ```
@@ -15,21 +18,10 @@ To maintain aspect ratio
 ```
 $ vice -r ~/Desktop/Filename.png 100 9999
 ```
-### Man Page
 
-```
-USAGE: vice <file> <width> <height> [--ratio]
+See man page for more details.
 
-ARGUMENTS:
-  <file>                  A local image file. 
-  <width>                 The target width of the image. 
-  <height>                The target height of the image. 
-
-OPTIONS:
-  -r, --ratio             Maintain aspect ratio 
-  -h, --help              Show help information.
-```
-### Jaws API
+### Usage: iOS Library
 
 The underlying core library is also available as a product (see installation below).
 
@@ -44,19 +36,16 @@ try jaws.resize()
 ```
 ## Installation
 
-Install [Swift](https://swift.org/getting-started/).
-
 ### Vice Command Line Tool
 ```
 $ git clone https://github.com/nashysolutions/Vice.git
 $ cd Vice
-$ swift build -c release
-$ cd .build/release
-$ cp -f vice /usr/local/bin/vice
+$ swift run task install
 ```
+
 If you have any issues with unix directories [this article](https://superuser.com/questions/717663/permission-denied-when-trying-to-cd-usr-local-bin-from-terminal) might be helpful.
 
-### Jaws Library
+### iOS Library
 
 ```swift
 let package = Package(
