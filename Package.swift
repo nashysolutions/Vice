@@ -4,7 +4,7 @@ import PackageDescription
 
 let package = Package(
     name: "Vice",
-    platforms: [.iOS(.v13), .macOS(.v10_13)],
+    platforms: [.iOS(.v14), .macOS(.v11)],
     products: [
         .executable(name: "vice", targets: ["Vice"]),
         .executable(name: "task", targets: ["ViceTasks"]),

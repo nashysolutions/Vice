@@ -30,10 +30,10 @@ public struct Vice: ParsableCommand {
     @Flag(name: .shortAndLong, help: "Maintain aspect ratio")
     public var ratio: Bool = false
 
-    public mutating func run() throws {
+    public mutating func run() async throws {
         let targetSize = CGSize(width: width, height: height)
         var jaws = Jaws(file: file, targetSize: targetSize, maintainRatio: ratio)
-        try jaws.resize()
+        try await jaws.resize()
     }
 }
 
