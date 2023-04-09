@@ -1,7 +1,7 @@
 # Vice
 
-![iOS](https://img.shields.io/badge/iOS-13%2B-blue)
-![macOS](https://img.shields.io/badge/macOS-10.13%2B-blue)
+![iOS](https://img.shields.io/badge/iOS-14%2B-blue)
+![macOS](https://img.shields.io/badge/macOS-11%2B-blue)
 
 ## Products
 
